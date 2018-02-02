@@ -1,0 +1,13 @@
+#lesspass {
+  background: blanchedalmond;
+  padding: 15px;
+  font-size: 1.1em;
+}
+  #lesspass * {
+    box-sizing: border-box;
+  }
+  #lesspass form > * {
+    display: block;
+    padding: 4px;
+    width: 100%;
+  }

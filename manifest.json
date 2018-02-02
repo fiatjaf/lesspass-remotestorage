@@ -1,0 +1,38 @@
+{
+  "name": "LessPass remoteStorage",
+  "description": "",
+  "homepage_url": "https://github.com/fiatjaf/lesspass-remotestorage",
+  "manifest_version": 2,
+  "version" : "0.0.1",
+  "applications": {
+    "gecko": {
+      "id": ""
+    }
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage",
+    "tabs"
+  ],
+  "background": {
+    "scripts": [
+      "dist/background.js"
+    ]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true,
+    "open_in_tab": true
+  },
+  "commands": {
+    "save-to-pinboard": {
+      "suggested_key": { "default": "Alt+L" },
+      "description": "LessPass here"
+    }
+  },
+  "icons": {
+    "48": "icon-white.svg",
+    "128": "icon-white.svg"
+  }
+}
