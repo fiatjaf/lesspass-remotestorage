@@ -22,24 +22,26 @@ function attach (el) {
       preventOverflow: {
         boundariesElement: document.body
       }
-    },
-    eventsEnabled: false
+    }
   })
 
-  lessPass.id = 'lesspass'
   document.body.appendChild(lessPass)
 
-  lessPass.appendChild(component.start())
+  let shadow = lessPass.attachShadow({mode: 'closed'})
+  shadow.appendChild(component.style)
+  shadow.appendChild(component.start())
 
   component.use((_, emitter) => {
     emitter.on('destroy', () => {
       popper.destroy()
+      document.body.removeChild(lessPass)
     })
 
     emitter.on('password', password => {
       console.log('got password', password)
       el.value = password
       popper.destroy()
+      document.body.removeChild(lessPass)
     })
   })
 }

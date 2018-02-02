@@ -3,8 +3,6 @@ const html = require('choo/html')
 const lesspass = require('lesspass')
 const debounce = require('debounce')
 
-require('./vendor/fontawesome-all.js')
-
 var app = choo()
 
 app.route(location.pathname, main)
@@ -13,16 +11,16 @@ app.use(fingerprinter)
 
 function main (state, emit) {
   return html`
-<div>
+<div id=lesspass>
   <form onsubmit=${onsubmit}>
     <input value=${state.domain} oninput=${changedomain}>
     <input value=${state.login} oninput=${changelogin}>
-    <div>
+    <div class=master>
       <input type=password value=${state.master} oninput=${changemaster}>
       ${state.fingerprint
-        ? html`<div class="fingerprint">
-            ${state.fingerprint.map(({icon, color}) =>
-              html`<i class="fas ${icon}" style="color: ${color}"></i>`
+        ? html`<div class=fingerprint>
+            ${state.fingerprint.map(icon =>
+              html`<img src="data:image/svg+xml;utf-8,${icon}">`
             )}
           </div>`
         : ''
@@ -92,9 +90,9 @@ function fingerprinter (state, emitter) {
     lesspass.createFingerprint(master)
       .then(fingerprint => {
         state.fingerprint = [
-          iconAndColor(fingerprint.substring(0, 6)),
-          iconAndColor(fingerprint.substring(6, 12)),
-          iconAndColor(fingerprint.substring(12, 18))
+          icon(fingerprint.substring(0, 6)),
+          icon(fingerprint.substring(6, 12)),
+          icon(fingerprint.substring(12, 18))
         ]
         emitter.emit('render')
       })
@@ -102,15 +100,55 @@ function fingerprinter (state, emitter) {
   })
 }
 
-function iconAndColor (hash) {
+function icon (hash) {
   let colors = ['#000000', '#074750', '#009191', '#FF6CB6', '#FFB5DA', '#490092', '#006CDB', '#B66DFF', '#6DB5FE', '#B5DAFE', '#920000', '#924900', '#DB6D00', '#24FE23']
-  let icons = ['fa-hashtag', 'fa-heart', 'fa-hotel', 'fa-university', 'fa-plug', 'fa-ambulance', 'fa-bus', 'fa-car', 'fa-plane', 'fa-rocket', 'fa-ship', 'fa-subway', 'fa-truck', 'fa-jpy', 'fa-eur', 'fa-btc', 'fa-usd', 'fa-gbp', 'fa-archive', 'fa-area-chart', 'fa-bed', 'fa-beer', 'fa-bell', 'fa-binoculars', 'fa-birthday-cake', 'fa-bomb', 'fa-briefcase', 'fa-bug', 'fa-camera', 'fa-cart-plus', 'fa-certificate', 'fa-coffee', 'fa-cloud', 'fa-coffee', 'fa-comment', 'fa-cube', 'fa-cutlery', 'fa-database', 'fa-diamond', 'fa-exclamation-circle', 'fa-eye', 'fa-flag', 'fa-flask', 'fa-futbol-o', 'fa-gamepad', 'fa-graduation-cap']
+  let icons = require('./icons')
 
   let n = parseInt(hash, 16)
-  return {
-    icon: icons[n % icons.length],
-    color: colors[n % colors.length]
-  }
+  let icon = icons[n % icons.length]
+  let color = colors[n % colors.length]
+
+  return icon.replace(/fill="[^"]+"/, `fill="${color}"`)
 }
 
 module.exports = app
+
+let css = `
+* {
+  box-sizing: border-box;
+}
+form {
+  display: flex;
+  flex-direction: column;
+
+  background-color: #d2ead6;
+  margin: 4px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 1.1em;
+  box-shadow: 1px 1px 1px black;
+}
+  form > * {
+    flex: auto;
+  }
+  form input {
+    margin: 1px 0;
+    padding: 2px;
+  }
+  .master {
+    display: flex;
+  }
+    .master > * {
+      flex: auto;
+    }
+  .fingerprint {
+    margin-left: 2px;
+  }
+    .fingerprint img {
+      height: 12px;
+      margin: 7px 2px 0 2px;
+    }
+`
+
+module.exports.style = document.createElement('style')
+module.exports.style.innerHTML = css

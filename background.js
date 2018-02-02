@@ -49,6 +49,5 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       }
       chrome.tabs.sendMessage(tab.id, 'lesspass-here')
     })
-    chrome.tabs.insertCSS(tab.id, {file: '/component.css'})
   }
 })
