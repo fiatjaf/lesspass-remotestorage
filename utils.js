@@ -1,6 +1,6 @@
 const fs = require('fs')
 
-module.exports = [
+module.exports.icons = [
   fs.readFileSync('vendor/fontawesome/hashtag.svg', 'utf-8'),
   fs.readFileSync('vendor/fontawesome/heart.svg', 'utf-8'),
   fs.readFileSync('vendor/fontawesome/hotel.svg', 'utf-8'),
@@ -48,3 +48,48 @@ module.exports = [
   fs.readFileSync('vendor/fontawesome/gamepad.svg', 'utf-8'),
   fs.readFileSync('vendor/fontawesome/graduation-cap.svg', 'utf-8')
 ]
+
+module.exports.colors = ['#000000', '#074750', '#009191', '#FF6CB6', '#FFB5DA', '#490092', '#006CDB', '#B66DFF', '#6DB5FE', '#B5DAFE', '#920000', '#924900', '#DB6D00', '#24FE23']
+
+module.exports.selectorFromNode = selectorFromNode
+function selectorFromNode (node) {
+  if (node.id) {
+    return '#' + node.id
+  }
+
+  let tag = node.tagName.toLowerCase()
+
+  var special = ''
+  if (node.name) {
+    special += `[name="${node.name}"]`
+  }
+
+  var cls = ''
+  if (!special && node.className) {
+    cls = node.className.split(/ +/g)
+      .map(cls => '.' + cls)
+      .join('')
+  }
+
+  var pos = ''
+  if (!special) {
+    var nthoftype = 0
+    for (let i = 0; i < node.parentNode.children.length; i++) {
+      let child = node.parentNode.children[i]
+      if (child.tagName === node.tagName) {
+        nthoftype++
+      }
+      if (node === child) {
+        pos = `:nth-of-type(${nthoftype})`
+        break
+      }
+    }
+  }
+
+  let sel = tag + special + cls + pos
+  if (node.parentNode === document.body) {
+    return 'body > ' + sel
+  } else {
+    return `${selectorFromNode(node.parentNode)} > ${sel}`
+  }
+}

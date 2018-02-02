@@ -34,16 +34,13 @@ rs.client.declareType('domain', {
           url: {
             type: 'string'
           },
-          login_field: {
-            type: 'string'
-          },
           password_field: {
             type: 'string'
           }
         }
       }
     },
-    accounts: {
+    profiles: {
       type: 'array',
       items: {
         type: 'object',
@@ -75,8 +72,8 @@ rs.client.declareType('domain', {
               symbols: {
                 type: 'boolean'
               },
-              template: {
-                type: 'string'
+              version: {
+                type: 'integer'
               }
             }
           }

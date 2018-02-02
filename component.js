@@ -72,7 +72,7 @@ function generator (state, emitter) {
   emitter.on('generate', debounce(() => {
     lesspass.generatePassword(state.domain, state.login, state.master, state.options)
       .then(password => {
-        emitter.emit('password', password)
+        emitter.emit('password', password, state.domain, state.login, state.options)
       })
       .catch(e => console.log('failed to generate password', e))
   }, 400))
@@ -101,8 +101,7 @@ function fingerprinter (state, emitter) {
 }
 
 function icon (hash) {
-  let colors = ['#000000', '#074750', '#009191', '#FF6CB6', '#FFB5DA', '#490092', '#006CDB', '#B66DFF', '#6DB5FE', '#B5DAFE', '#920000', '#924900', '#DB6D00', '#24FE23']
-  let icons = require('./icons')
+  const {icons, colors} = require('./utils')
 
   let n = parseInt(hash, 16)
   let icon = icons[n % icons.length]

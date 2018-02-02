@@ -51,3 +51,50 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     })
   }
 })
+
+chrome.runtime.onMessage.addListener(message => {
+  console.log('message!', message)
+
+  if (message.page && message.profile) {
+    let {page, profile} = message
+
+    rs.client.getObject(`domains/${profile.actual_domain}`)
+      .catch(e => console.log('error fetch domain before updating', e))
+      .then(domain => {
+        domain = domain || {
+          pages: [],
+          profiles: []
+        }
+
+        var foundPage = false
+        for (let i = 0; i < domain.pages.length; i++) {
+          if (page.url === domain.pages[i].url) {
+            foundPage = true
+            break
+          }
+        }
+
+        var foundProfile = false
+        for (let i = 0; i < domain.profiles.length; i++) {
+          if (profile.actual_domain === domain.profiles[i].actual_domain) {
+            foundProfile = true
+            break
+          }
+        }
+
+        if (!foundPage) {
+          domain.pages.push(page)
+        }
+
+        if (!foundProfile) {
+          domain.profiles.push(profile)
+        }
+
+        rs.client.storeObject('domain', `domains/${profile.actual_domain}`, domain)
+          .then(x => {
+            console.log('saved', x)
+          })
+          .catch(e => console.log('failed to save domain object', e))
+      })
+  }
+})
