@@ -2,15 +2,15 @@
 
 const Popper = require('popper.js')
 const component = require('./component')
-const {selectorFromNode} = require('./utils')
 
-chrome.runtime.onMessage.addListener((message) => {
-  if (message === 'lesspass-here') {
-    attach(document.activeElement)
+chrome.runtime.onMessage.addListener(message => {
+  if (message.kind === 'lesspass-here') {
+    console.log(message.profiles)
+    attach(document.activeElement, message.profiles)
   }
 })
 
-function attach (el) {
+function attach (el, profiles) {
   var lessPass = document.createElement('div')
 
   let popper = new Popper(el, lessPass, {
@@ -43,18 +43,14 @@ function attach (el) {
       popper.destroy()
 
       // send stuff to be saved on remoteStorage
-      let page = {
-        url: location.protocol + '//' + location.host + location.pathname + location.search,
-        password_field: selectorFromNode(el)
-      }
-
-      let profile = {
-        actual_domain: domain,
-        login,
-        options
-      }
-
-      chrome.runtime.sendMessage({page, profile})
+      chrome.runtime.sendMessage({
+        host: location.host,
+        profile: {
+          domain,
+          login,
+          options
+        }
+      })
     })
   })
 }

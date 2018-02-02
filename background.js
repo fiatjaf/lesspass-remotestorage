@@ -1,38 +1,7 @@
 /* global chrome */
 
-const parse = require('url-parse')
+const parse = require('parse-url')
 const rs = require('./remotestorage')
-
-var domains = null
-function loadDomains (cb) {
-  if (domains) {
-    return cb(domains)
-  }
-
-  rs.on('connected', () => {
-    rs.client.getListing('domains/')
-      .then(res => {
-        console.log('listing', res)
-        domains = res
-        cb(domains)
-      })
-      .catch(e => console.log('error loading domains/ listing', e))
-  })
-}
-
-chrome.tabs.onUpdated.addListener((tabId, {status}, tab) => {
-  if (status !== 'complete') return
-  loadDomains(domains => {
-    let url = parse(tab.url)
-    if (url.host in domains) {
-      rs.client.getObject(`domains/${url.host}`)
-        .then(res => {
-          console.log('loaded', res)
-        })
-        .catch(e => console.log('failed loading', `domains/${url.host}`, e))
-    }
-  })
-})
 
 chrome.contextMenus.create({
   contexts: [typeof browser === 'undefined' ? 'editable' : 'password'],
@@ -47,54 +16,52 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         console.log('problem injecting content-script', chrome.runtime.lastError)
         return
       }
-      chrome.tabs.sendMessage(tab.id, 'lesspass-here')
     })
+
+    rs.client.getObject(`hosts/${parse(tab.url).resource}`)
+      .then(hostData => {
+        console.log('hostData', hostData)
+        if (hostData) {
+          return Promise.all(
+            hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
+          )
+        }
+      })
+      .then(profiles => {
+        console.log('profiles', profiles)
+        chrome.tabs.sendMessage(tab.id, {
+          kind: 'lesspass-here',
+          profiles
+        })
+      })
+      .catch(e => console.log('failed to fetch data on host', parse(tab.url).resource, e))
   }
 })
 
 chrome.runtime.onMessage.addListener(message => {
   console.log('message!', message)
 
-  if (message.page && message.profile) {
-    let {page, profile} = message
+  if (message.host && message.profile) {
+    let {host, profile} = message
 
-    rs.client.getObject(`domains/${profile.actual_domain}`)
-      .catch(e => console.log('error fetch domain before updating', e))
-      .then(domain => {
-        domain = domain || {
-          pages: [],
-          profiles: []
-        }
-
-        var foundPage = false
-        for (let i = 0; i < domain.pages.length; i++) {
-          if (page.url === domain.pages[i].url) {
-            foundPage = true
-            break
+    rs.client.getObject(host)
+      .then((hostData = {profiles: []}) => {
+        var found = false
+        hostData.profiles.forEach(prf => {
+          if (prf === `${profile.domain}/${profile.login}`) {
+            found = true
           }
+        })
+        if (!found) {
+          hostData.profiles.push(`${profile.domain}/${profile.login}`)
+          return rs.client.storeObject('host', `hosts/${host}`, hostData)
         }
-
-        var foundProfile = false
-        for (let i = 0; i < domain.profiles.length; i++) {
-          if (profile.actual_domain === domain.profiles[i].actual_domain) {
-            foundProfile = true
-            break
-          }
-        }
-
-        if (!foundPage) {
-          domain.pages.push(page)
-        }
-
-        if (!foundProfile) {
-          domain.profiles.push(profile)
-        }
-
-        rs.client.storeObject('domain', `domains/${profile.actual_domain}`, domain)
-          .then(x => {
-            console.log('saved', x)
-          })
-          .catch(e => console.log('failed to save domain object', e))
       })
+      .then(() => console.log('updated host', host))
+      .catch(e => console.log('failed to update host', host, e))
+
+    rs.client.storeObject('profile', `profiles/${profile.domain}/${profile.login}`, profile)
+      .then(() => console.log('updated profile', profile))
+      .catch(e => console.log('failed to update profile', profile, e))
   }
 })

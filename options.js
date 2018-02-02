@@ -4,11 +4,11 @@ let token = document.querySelector('[name="token"]')
 let user = document.querySelector('[name="user"]')
 
 chrome.storage.sync.get(['user', 'token'], res => {
-  user.value = res.user
-  token.value = res.token
+  user.value = res.user || ''
+  token.value = res.token || ''
 })
 
-user.addEventListener('user', e => {
+user.addEventListener('input', e => {
   let user = e.target.value
   chrome.storage.sync.set({user}, () => {
     if (chrome.runtime.lastError) {
@@ -18,7 +18,7 @@ user.addEventListener('user', e => {
   })
 })
 
-token.addEventListener('token', e => {
+token.addEventListener('input', e => {
   let token = e.target.value
   chrome.storage.sync.set({token}, () => {
     if (chrome.runtime.lastError) {

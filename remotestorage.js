@@ -23,60 +23,49 @@ chrome.storage.sync.get(['user', 'token'], res => {
   rs.connect(res.user, res.token)
 })
 
-rs.client.declareType('domain', {
+rs.client.declareType('host', {
   type: 'object',
   properties: {
-    pages: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          url: {
-            type: 'string'
-          },
-          password_field: {
-            type: 'string'
-          }
-        }
-      }
-    },
     profiles: {
       type: 'array',
       items: {
-        type: 'object',
-        properties: {
-          actual_domain: {
-            type: 'string'
-          },
-          login: {
-            type: 'string'
-          },
-          options: {
-            type: 'object',
-            properties: {
-              counter: {
-                type: 'integer'
-              },
-              length: {
-                type: 'integer'
-              },
-              lowercase: {
-                type: 'boolean'
-              },
-              uppercase: {
-                type: 'boolean'
-              },
-              numbers: {
-                type: 'boolean'
-              },
-              symbols: {
-                type: 'boolean'
-              },
-              version: {
-                type: 'integer'
-              }
-            }
-          }
+        type: 'string'
+      }
+    }
+  }
+})
+rs.client.declareType('profile', {
+  type: 'object',
+  properties: {
+    domain: {
+      type: 'string'
+    },
+    login: {
+      type: 'string'
+    },
+    options: {
+      type: 'object',
+      properties: {
+        counter: {
+          type: 'integer'
+        },
+        length: {
+          type: 'integer'
+        },
+        lowercase: {
+          type: 'boolean'
+        },
+        uppercase: {
+          type: 'boolean'
+        },
+        numbers: {
+          type: 'boolean'
+        },
+        symbols: {
+          type: 'boolean'
+        },
+        version: {
+          type: 'integer'
         }
       }
     }
