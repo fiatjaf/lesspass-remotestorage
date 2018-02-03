@@ -11,6 +11,16 @@ app.use(profileStarter)
 app.use(generator)
 app.use(fingerprinter)
 
+window.defaultOptions = {
+  uppercase: true,
+  lowercase: true,
+  numbers: true,
+  symbols: true,
+  length: 16,
+  counter: 1,
+  version: 2
+}
+
 function main (state, emit) {
   function profileItem (prf, idx) {
     return html`
@@ -28,26 +38,72 @@ function main (state, emit) {
     `
   }
 
+  function renderIcon (svg) {
+    return html`<img src="data:image/svg+xml;utf-8,${svg}">`
+  }
+
   return html`
 <div id=lesspass>
   <div id="controls">
     <a href=#
-       onclick=${toggleloading}
-       class=${state.loading ? 'cancel' : 'load'}
-    >${state.loading ? 'cancel' : 'load profiles'}</a>
+       onclick=${toggleoptions}
+       style="display: ${state.showingprofiles ? 'none' : ''}"
+    >${state.showingoptions ? 'close options' : 'show options'}</a>
+    <a href=#
+       onclick=${toggleprofiles}
+       class=${state.showingprofiles ? 'cancel' : ''}
+    >${state.showingprofiles ? 'cancel' : 'load profiles'}</a>
   </div>
-  <ul id="profiles" style="display: ${state.loading ? '' : 'none'}">
+  <ul id="profiles" style="display: ${state.showingprofiles ? '' : 'none'}">
     ${state.profiles.map(profileItem)}
   </ul>
-  <form onsubmit=${generate} style="display: ${state.loading ? 'none' : ''}">
+  <form onsubmit=${generate} style="display: ${state.showingprofiles ? 'none' : ''}">
     <input value=${state.domain} oninput=${changedomain}>
     <input value=${state.login} oninput=${changelogin}>
     <div class=master>
       <input type=password value=${state.master} oninput=${changemaster}>
       <div class=fingerprint style="display: ${state.fingerprint ? '' : 'none'}">
-        ${(state.fingerprint || []).map(icon =>
-          html`<img src="data:image/svg+xml;utf-8,${icon}">`
-        )}
+        ${(state.fingerprint || []).map(renderIcon)}
+      </div>
+    </div>
+    <div id="options" style="display: ${state.showingoptions ? '' : 'none'}">
+      <div>
+        <label>a-z
+          <input type="checkbox"
+                 onchange=${checkoption.bind(null, 'lowercase')}
+                 checked=${state.options.lowercase}>
+        </label>
+        <label>A-Z
+          <input type="checkbox"
+                 onchange=${checkoption.bind(null, 'uppercase')}
+                 checked=${state.options.uppercase}>
+        </label>
+        <label>0-9
+          <input type="checkbox"
+                 onchange=${checkoption.bind(null, 'numbers')}
+                 checked=${state.options.numbers}>
+        </label>
+        <label>%!@
+          <input type="checkbox"
+                 onchange=${checkoption.bind(null, 'symbols')}
+                 checked=${state.options.symbols}>
+        </label>
+      </div>
+      <div>
+        <label>Length:
+          <input type="number"
+                 step=1
+                 value=${state.options.length}
+                 oninput=${changeoption.bind(null, 'length')}
+                 min=5>
+        </label>
+        <label>Counter:
+          <input type="number"
+                 step=1
+                 value=${state.options.counter}
+                 oninput=${changeoption.bind(null, 'counter')}
+                 min=1>
+        </label>
       </div>
     </div>
     <button>Generate</button>
@@ -55,9 +111,14 @@ function main (state, emit) {
 </div>
   `
 
-  function toggleloading (e) {
+  function toggleoptions (e) {
     e.preventDefault()
-    emit('loading', !state.loading)
+    emit('showingoptions', !state.showingoptions)
+  }
+
+  function toggleprofiles (e) {
+    e.preventDefault()
+    emit('showingprofiles', !state.showingprofiles)
   }
 
   function load (idx, e) {
@@ -68,6 +129,14 @@ function main (state, emit) {
   function remove (idx, e) {
     e.preventDefault()
     emit('remove', idx)
+  }
+
+  function changeoption (attr, e) {
+    emit('setoption', attr, parseInt(e.target.value))
+  }
+
+  function checkoption (attr, e) {
+    emit('setoption', attr, e.target.checked)
   }
 
   function changedomain (e) {
@@ -90,26 +159,32 @@ function main (state, emit) {
 }
 
 function controller (state, emitter) {
-  state.loading = false
+  state.showingoptions = false
+  state.showingprofiles = false
 
-  emitter.on('loading', loading => {
-    state.loading = loading
+  emitter.on('showingoptions', showingoptions => {
+    state.showingoptions = showingoptions
+    emitter.emit('render')
+  })
+
+  emitter.on('showingprofiles', showingprofiles => {
+    state.showingprofiles = showingprofiles
     emitter.emit('render')
   })
 
   emitter.on('load', idx => {
     let profile = state.profiles[idx]
     chooseProfile(state, profile)
-    state.loading = false
+    state.showingprofiles = false
     emitter.emit('render')
   })
 
   emitter.on('remove', idx => {
     let name = state.profiles[idx].domain + '/' + state.profiles[idx].login
-    if (confirm(`Delete the ${name} profile from remoteStorage?`)) {
+    if (window.confirm(`Delete the ${name} profile from remoteStorage?`)) {
       emitter.emit('rs-delete', name)
       state.profiles.splice(idx, 1)
-      state.loading = false
+      state.showingprofiles = false
       emitter.emit('render')
     }
   })
@@ -130,15 +205,12 @@ function generator (state, emitter) {
   state.domain = location.host
   state.login = ''
   state.master = ''
-  state.options = {
-    uppercase: true,
-    lowercase: true,
-    numbers: true,
-    symbols: true,
-    length: 16,
-    counter: 1,
-    version: 2
-  }
+  state.options = Object.assign({}, window.defaultOptions)
+
+  emitter.on('setoption', (key, value) => {
+    state.options[key] = value
+    emitter.emit('render')
+  })
 
   emitter.on('change', (key, value) => {
     state[key] = value
@@ -213,14 +285,16 @@ ul, li {
 }
 
 #controls {
+  display: flex;
+  margin-bottom: 8px;
   text-align: right;
-  margin-bottom: 12px;
 }
   #controls a {
+    flex: auto;
     padding: 4px;
   }
-  #controls a.load { color: rgba(255, 255, 255, 0.5) }
-  #controls a.load:hover { color: rgba(255, 255, 255, 0.9) }
+  #controls a { color: rgba(255, 255, 255, 0.5) }
+  #controls a:hover { color: rgba(255, 255, 255, 0.9) }
   #controls a.cancel { color: rgba(226, 210, 75, 0.7) }
   #controls a.cancel:hover { color: rgba(226, 210, 75, 1) }
 
@@ -291,13 +365,51 @@ form {
     padding-bottom: 7px;
     color: white;
   }
+  #options {}
+    #options input {
+      padding: 2px;
+    }
+    #options input:not([type="checkbox"]) {
+      width: 45px;
+      margin-left: 2px;
+    }
+    #options > * {
+      display: flex;
+    }
+      #options > * > * {
+        flex: auto;
+      }
+    #options label {
+      background: rgba(255, 255, 255, 0.6);
+      color: #333;
+      margin: 3px;
+      padding: 3px;
+
+      display: flex;
+    }
+      #options label > * {
+        flex: auto;
+      }
+    #options label:first-child { margin-left: 0 }
+    #options label:last-child { margin-right: 0 }
 `
 
 function chooseProfile (state, profile) {
   state.domain = profile.domain
   state.login = profile.login
-  state.options = profile.options
+
+  var optionsDifferentThanDefault = false
+  for (let k in profile.options) {
+    if (profile.options[k] !== window.defaultOptions[k]) {
+      optionsDifferentThanDefault = true
+      break
+    }
+  }
+
+  state.options = Object.assign({}, profile.options)
   state.master = ''
+
+  state.showingoptions = optionsDifferentThanDefault
 }
 
 module.exports.style = document.createElement('style')

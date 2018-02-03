@@ -9,8 +9,8 @@
   },
   "devDependencies": {
     "brfs": "^1.4.4",
-    "browserify": "11.0.1",
-    "browserify-incremental": "^3.0.1"
+    "browserify": "^15.2.0",
+    "browserify-incremental": "^3.1.1"
   },
   "browserify": {
     "transform": [
@@ -19,11 +19,11 @@
   },
   "scripts": {
     "watch-cs": "ls *.js | entr browserifyinc -vd content-script.js -o dist/content-script.js",
-    "build-cs": "browserifyinc content-script.js -o dist/content-script.js",
+    "build-cs": "browserify content-script.js -o dist/content-script.js",
     "watch-opt": "ls *.js | entr browserifyinc -vd options.js -o dist/options.js",
-    "build-opt": "browserifyinc options.js -o dist/options.js",
+    "build-opt": "browserify options.js -o dist/options.js",
     "watch-back": "ls *.js | entr browserifyinc -vd background.js -o dist/background.js",
-    "build-back": "browserifyinc background.js -o dist/background.js",
+    "build-back": "browserify background.js -o dist/background.js",
     "pack": "rm -fr tmp/ && npm run build && mkdir -p tmp && cp -r dist vendor tmp/ && cp icon128.png icon64.png icon48.png icon16.png manifest.json options.html options.js links.css tmp/ && cd tmp/ && zip -r archive * && mv archive.zip ../ && cd .."
   }
 }
