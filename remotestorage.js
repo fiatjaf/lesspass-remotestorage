@@ -12,6 +12,9 @@ module.exports.client = rs.scope('/lesspass/')
 
 rs.on('error', e => {
   console.log('remoteStorage error:', e)
+  if (e.name === 'Unauthorized') {
+    localStorage.removeItem('remotestorage:wireclient')
+  }
 })
 
 rs.on('connected', () => {
