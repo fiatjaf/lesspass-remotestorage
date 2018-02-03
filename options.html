@@ -5,24 +5,61 @@
 * {
   font-size: 120%;
   box-sizing: border-box;
+  font-family: Ubuntu, Arial, sans-serif;
 }
 body {
   margin: auto;
   width: 800px;
   max-width: 97%;
+  background-color: #3398EB;
 }
-header {
-  text-align: center;
-}
-input {
+
+#main {
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 5px;
+  height: 100vh;
 }
+  #main > * {
+    flex: auto;
+    margin: 8px;
+    display: flex;
+    flex-direction: column;
+  }
+    #main img {
+      display: block;
+      width: 220px;
+      margin: -100px auto 0;
+    }
+    #main label {
+      flex: auto;
+      margin: 2px;
+      display: flex;
+      justify-content: space-between;
+      color: white;
+    }
+      #main label span {
+        flex-shrink: 2;
+        min-width: 110px;
+        line-height: 50px;
+      }
+      #main label input {
+        flex-grow: 2;
+      }
+  #main input {
+    margin-left: 5px;
+    width: 100%;
+  }
 </style>
 
 <div id="main">
-  <label>user: <input name="user"></label>
-  <label>token: <input name="token"></label>
+  <div>
+    <div>
+      <img src=icon-white.svg>
+    </div>
+    <label><span>User: </span><input name="user"></label>
+    <label><span>Token: </span><input name="token"></label>
+  </div>
 </div>
 
 <script src=dist/options.js></script>
