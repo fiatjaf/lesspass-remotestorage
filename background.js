@@ -41,10 +41,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 chrome.runtime.onMessage.addListener(message => {
   console.log('message!', message)
 
-  if (message.host && message.profile) {
+  if (message.kind === 'to-save') {
     let {host, profile} = message
 
-    rs.client.getObject(host)
+    rs.client.getObject(`hosts/${host}`)
       .then((hostData = {profiles: []}) => {
         var found = false
         hostData.profiles.forEach(prf => {
@@ -53,7 +53,7 @@ chrome.runtime.onMessage.addListener(message => {
           }
         })
         if (!found) {
-          hostData.profiles.push(`${profile.domain}/${profile.login}`)
+          hostData.profiles.unshift(`${profile.domain}/${profile.login}`)
           return rs.client.storeObject('host', `hosts/${host}`, hostData)
         }
       })

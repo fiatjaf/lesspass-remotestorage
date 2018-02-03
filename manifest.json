@@ -25,12 +25,6 @@
     "chrome_style": true,
     "open_in_tab": true
   },
-  "commands": {
-    "save-to-pinboard": {
-      "suggested_key": { "default": "Alt+L" },
-      "description": "LessPass here"
-    }
-  },
   "icons": {
     "48": "icon-white.svg",
     "128": "icon-white.svg"

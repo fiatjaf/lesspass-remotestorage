@@ -10,6 +10,10 @@ rs.caching.enable('/lesspass/')
 module.exports = rs
 module.exports.client = rs.scope('/lesspass/')
 
+rs.on('error', e => {
+  console.log('remoteStorage error:', e)
+})
+
 rs.on('connected', () => {
   const userAddress = rs.remote.userAddress
   console.log(`${userAddress} connected their remote storage.`)

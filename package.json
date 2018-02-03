@@ -4,7 +4,6 @@
     "debounce": "^1.1.0",
     "lesspass": "^6.0.0",
     "parse-url": "^3.0.2",
-    "popper.js": "^1.12.9",
     "remotestoragejs": "^1.0.2"
   },
   "devDependencies": {

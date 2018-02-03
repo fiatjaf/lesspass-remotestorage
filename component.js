@@ -6,25 +6,24 @@ const debounce = require('debounce')
 var app = choo()
 
 app.route(location.pathname, main)
+app.use(profileStarter)
 app.use(generator)
 app.use(fingerprinter)
 
 function main (state, emit) {
   return html`
 <div id=lesspass>
+  
   <form onsubmit=${onsubmit}>
     <input value=${state.domain} oninput=${changedomain}>
     <input value=${state.login} oninput=${changelogin}>
     <div class=master>
       <input type=password value=${state.master} oninput=${changemaster}>
-      ${state.fingerprint
-        ? html`<div class=fingerprint>
-            ${state.fingerprint.map(icon =>
-              html`<img src="data:image/svg+xml;utf-8,${icon}">`
-            )}
-          </div>`
-        : ''
-      }
+      <div class=fingerprint style="display: ${state.fingerprint ? 'block' : 'none'}">
+        ${(state.fingerprint || []).map(icon =>
+          html`<img src="data:image/svg+xml;utf-8,${icon}">`
+        )}
+      </div>
     </div>
     <button>Generate</button>
   </form>
@@ -48,6 +47,13 @@ function main (state, emit) {
     e.preventDefault()
     emit('generate')
   }
+}
+
+function profileStarter (state, emitter) {
+  emitter.on('profiles', profiles => {
+    chooseProfile(state, profiles[0])
+    emitter.emit('render')
+  })
 }
 
 function generator (state, emitter) {
@@ -120,19 +126,20 @@ form {
   display: flex;
   flex-direction: column;
 
-  background-color: #d2ead6;
-  margin: 4px;
-  padding: 12px;
+  background-color: #3398EB;
+  margin: 3px;
+  padding: 16px 14px;
   border-radius: 6px;
   font-size: 1.1em;
-  box-shadow: 1px 1px 1px black;
+  box-shadow: 1px 1px 8px #555;
 }
   form > * {
     flex: auto;
+    margin-top: 8px;
   }
-  form input {
-    margin: 1px 0;
-    padding: 2px;
+  form input, form button {
+    border: 0;
+    padding: 6px;
   }
   .master {
     display: flex;
@@ -140,14 +147,29 @@ form {
     .master > * {
       flex: auto;
     }
-  .fingerprint {
-    margin-left: 2px;
-  }
-    .fingerprint img {
-      height: 12px;
-      margin: 7px 2px 0 2px;
+    .fingerprint {
+      margin-left: 2px;
+      padding: 0 2px;
     }
+      .fingerprint img {
+        height: 15px;
+        margin: 7px 3px 0 3px;
+      }
+  form button {
+    cursor: pointer;
+    background-color: #024379;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    color: white;
+  }
 `
+
+function chooseProfile (state, profile) {
+  state.domain = profile.domain
+  state.login = profile.login
+  state.options = profile.options
+  state.master = ''
+}
 
 module.exports.style = document.createElement('style')
 module.exports.style.innerHTML = css
