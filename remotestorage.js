@@ -22,13 +22,23 @@ rs.on('connected', () => {
   console.log(`${userAddress} connected their remote storage.`)
 })
 
-chrome.storage.sync.get(['user', 'token'], res => {
-  if (chrome.runtime.lastError) {
-    console.log('failed to fetch token', chrome.runtime.lastError)
-    return
+function connect () {
+  chrome.storage.sync.get(['user', 'token'], res => {
+    if (chrome.runtime.lastError) {
+      console.log('failed to fetch token', chrome.runtime.lastError)
+      return
+    }
+    rs.connect(res.user, res.token)
+  })
+}
+
+chrome.storage.onChanged.addListener((change, areaName) => {
+  if (areaName === 'sync' && (change.token || change.user)) {
+    connect()
   }
-  rs.connect(res.user, res.token)
 })
+
+connect()
 
 rs.client.declareType('host', {
   type: 'object',
