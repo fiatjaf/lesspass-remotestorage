@@ -50,6 +50,7 @@ if (!window.loaded) {
   var lessPass = document.createElement('div')
   document.body.appendChild(lessPass)
 
+  lessPass.style.zIndex = 999
   lessPass.style.display = 'none'
   lessPass.style.position = 'fixed'
   lessPass.style.top = '9px'
