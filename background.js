@@ -38,30 +38,60 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 })
 
-chrome.runtime.onMessage.addListener(message => {
+chrome.runtime.onMessage.addListener((message, {url}) => {
   console.log('message!', message)
 
-  if (message.kind === 'to-save') {
-    let {host, profile} = message
+  var profileName
+  let host = parse(url).resource
 
-    rs.client.getObject(`hosts/${host}`)
-      .then((hostData = {profiles: []}) => {
-        var found = false
-        hostData.profiles.forEach(prf => {
-          if (prf === `${profile.domain}/${profile.login}`) {
-            found = true
+  switch (message.kind) {
+    case 'to-save':
+      let {profile} = message
+      profileName = `${profile.domain}/${profile.login}`
+
+      rs.client.getObject(`hosts/${host}`)
+        .then((hostData = {profiles: []}) => {
+          var found = false
+          hostData.profiles.forEach(prf => {
+            if (prf === profileName) {
+              found = true
+            }
+          })
+          if (!found) {
+            hostData.profiles.unshift(profileNa,e)
+            return rs.client.storeObject('host', `hosts/${host}`, hostData)
           }
         })
-        if (!found) {
-          hostData.profiles.unshift(`${profile.domain}/${profile.login}`)
-          return rs.client.storeObject('host', `hosts/${host}`, hostData)
-        }
-      })
-      .then(() => console.log('updated host', host))
-      .catch(e => console.log('failed to update host', host, e))
+        .then(() => console.log('updated host', host))
+        .catch(e => console.log('failed to update host', host, e))
 
-    rs.client.storeObject('profile', `profiles/${profile.domain}/${profile.login}`, profile)
-      .then(() => console.log('updated profile', profile))
-      .catch(e => console.log('failed to update profile', profile, e))
+      rs.client.storeObject('profile', `profiles/${profileName}`, profile)
+        .then(() => console.log('updated profile', profile))
+        .catch(e => console.log('failed to update profile', profile, e))
+      break
+
+    case 'to-delete':
+      profileName = message.profileName
+
+      rs.client.getObject(`hosts/${host}`)
+        .then((hostData = {profiles: []}) => {
+          var idx
+          for (let i = 0; i < hostData.profiles.length; i++) {
+            if (hostData.profiles[i] === profileName) {
+              idx = i
+              break
+            }
+          }
+
+          if (idx !== undefined) {
+            hostData.profiles.splice(idx, 1)
+            return rs.client.storeObject('host', `hosts/${host}`, hostData)
+          }
+        })
+        .then(() =>
+          rs.client.remove(`profiles/${profileName}`)
+        )
+        .catch(e => console.log('failed to delete profile', profileName, e))
+      break
   }
 })

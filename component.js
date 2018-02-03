@@ -6,20 +6,45 @@ const debounce = require('debounce')
 var app = choo()
 
 app.route(location.pathname, main)
+app.use(controller)
 app.use(profileStarter)
 app.use(generator)
 app.use(fingerprinter)
 
 function main (state, emit) {
+  function profileItem (prf, idx) {
+    return html`
+      <li>
+        <a href=# onclick=${load.bind(null, idx)}>
+          ${prf.domain}/${prf.login}
+        </a>
+        <a href=#
+           class="remove"
+           title="delete this profile"
+           onclick=${remove.bind(null, idx)}>
+          ×
+        </a>
+      </li>
+    `
+  }
+
   return html`
 <div id=lesspass>
-  
-  <form onsubmit=${onsubmit}>
+  <div id="controls">
+    <a href=#
+       onclick=${toggleloading}
+       class=${state.loading ? 'cancel' : 'load'}
+    >${state.loading ? 'cancel' : 'load profiles'}</a>
+  </div>
+  <ul id="profiles" style="display: ${state.loading ? '' : 'none'}">
+    ${state.profiles.map(profileItem)}
+  </ul>
+  <form onsubmit=${generate} style="display: ${state.loading ? 'none' : ''}">
     <input value=${state.domain} oninput=${changedomain}>
     <input value=${state.login} oninput=${changelogin}>
     <div class=master>
       <input type=password value=${state.master} oninput=${changemaster}>
-      <div class=fingerprint style="display: ${state.fingerprint ? 'block' : 'none'}">
+      <div class=fingerprint style="display: ${state.fingerprint ? '' : 'none'}">
         ${(state.fingerprint || []).map(icon =>
           html`<img src="data:image/svg+xml;utf-8,${icon}">`
         )}
@@ -29,6 +54,21 @@ function main (state, emit) {
   </form>
 </div>
   `
+
+  function toggleloading (e) {
+    e.preventDefault()
+    emit('loading', !state.loading)
+  }
+
+  function load (idx, e) {
+    e.preventDefault()
+    emit('load', idx)
+  }
+
+  function remove (idx, e) {
+    e.preventDefault()
+    emit('remove', idx)
+  }
 
   function changedomain (e) {
     emit('change', 'domain', e.target.value)
@@ -43,14 +83,44 @@ function main (state, emit) {
     emit('fingerprint', e.target.value)
   }
 
-  function onsubmit (e) {
+  function generate (e) {
     e.preventDefault()
     emit('generate')
   }
 }
 
+function controller (state, emitter) {
+  state.loading = false
+
+  emitter.on('loading', loading => {
+    state.loading = loading
+    emitter.emit('render')
+  })
+
+  emitter.on('load', idx => {
+    let profile = state.profiles[idx]
+    chooseProfile(state, profile)
+    state.loading = false
+    emitter.emit('render')
+  })
+
+  emitter.on('remove', idx => {
+    let name = state.profiles[idx].domain + '/' + state.profiles[idx].login
+    if (confirm(`Delete the ${name} profile from remoteStorage?`)) {
+      emitter.emit('rs-delete', name)
+      state.profiles.splice(idx, 1)
+      state.loading = false
+      emitter.emit('render')
+    }
+  })
+}
+
 function profileStarter (state, emitter) {
-  emitter.on('profiles', profiles => {
+  state.profiles = []
+
+  emitter.on('rs-profiles', profiles => {
+    state.profiles = profiles
+
     chooseProfile(state, profiles[0])
     emitter.emit('render')
   })
@@ -78,7 +148,8 @@ function generator (state, emitter) {
   emitter.on('generate', debounce(() => {
     lesspass.generatePassword(state.domain, state.login, state.master, state.options)
       .then(password => {
-        emitter.emit('password', password, state.domain, state.login, state.options)
+        emitter.emit('out-password', password)
+        emitter.emit('rs-store', state.domain, state.login, state.options)
       })
       .catch(e => console.log('failed to generate password', e))
   }, 400))
@@ -123,16 +194,72 @@ let css = `
   box-sizing: border-box;
   font-family: Ubuntu, Arial, sans-serif;
 }
-form {
-  display: flex;
-  flex-direction: column;
 
+#lesspass {
   background-color: #3398EB;
   margin: 3px;
   padding: 16px 14px;
   border-radius: 6px;
   font-size: 1.1em;
   box-shadow: 1px 1px 8px #555;
+}
+
+a { text-decoration: none; }
+
+ul, li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#controls {
+  text-align: right;
+  margin-bottom: 12px;
+}
+  #controls a {
+    padding: 4px;
+  }
+  #controls a.load { color: rgba(255, 255, 255, 0.5) }
+  #controls a.load:hover { color: rgba(255, 255, 255, 0.9) }
+  #controls a.cancel { color: rgba(226, 210, 75, 0.7) }
+  #controls a.cancel:hover { color: rgba(226, 210, 75, 1) }
+
+#profiles {
+  display: flex;
+  flex-direction: column;
+}
+  #profiles > * {
+    flex: auto;
+  }
+  #profiles li {
+    margin: 2px;
+    display: flex;
+    justify-content: space-between;
+  }
+    #profiles li > * {
+      display: flex;
+    }
+  #profiles a {
+    padding: 2px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  #profiles a:hover { color: rgba(255, 255, 255, 1) }
+  #profiles .remove {
+    border-radius: 100px;
+    line-height: 10px;
+    padding: 7px 9px;
+    margin-left: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #333;
+  }
+    #profiles .remove a { color: #333; }
+    #profiles .remove:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+      #profiles .remove:hover a { color: #777; }
+form {
+  display: flex;
+  flex-direction: column;
 }
   form > * {
     flex: auto;

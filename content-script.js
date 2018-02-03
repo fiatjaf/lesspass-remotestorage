@@ -29,6 +29,7 @@ if (!window.loaded) {
   var passwordField
   var sendProfiles
   var lastProfiles = []
+  var remove
 
   var lessPass = document.createElement('div')
   document.body.appendChild(lessPass)
@@ -42,30 +43,40 @@ if (!window.loaded) {
   shadow.appendChild(component.style)
   shadow.appendChild(component.start())
 
-  function remove () {
-    lessPass.style.display = 'none'
-    outsideHandler.off()
-  }
-
   component.use((_, emitter) => {
+    remove = function () {
+      emitter.emit('loading', false)
+      lessPass.style.display = 'none'
+      outsideHandler.off()
+    }
+
     emitter.on('destroy', () => {
       remove()
     })
 
     sendProfiles = function (profiles) {
-      emitter.emit('profiles', profiles)
+      emitter.emit('rs-profiles', profiles)
     }
 
-    emitter.on('password', (password, domain, login, options) => {
+    emitter.on('rs-delete', profileName => {
+      // send profile to be deleted from remoteStorage
+      chrome.runtime.sendMessage({
+        kind: 'to-delete',
+        profileName: profileName
+      })
+    })
+
+    emitter.on('out-password', password => {
       remove()
 
       // write password to field
       passwordField.value = password
+    })
 
+    emitter.on('rs-store', (domain, login, options) => {
       // send stuff to be saved on remoteStorage
       chrome.runtime.sendMessage({
         kind: 'to-save',
-        host: location.host,
         profile: {
           domain,
           login,
