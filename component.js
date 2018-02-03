@@ -11,25 +11,20 @@ app.use(profileStarter)
 app.use(generator)
 app.use(fingerprinter)
 
-window.defaultOptions = {
-  uppercase: true,
-  lowercase: true,
-  numbers: true,
-  symbols: true,
-  length: 16,
-  counter: 1,
-  version: 2
-}
-
 function main (state, emit) {
   function profileItem (prf, idx) {
+    let name = typeof prf === 'string'
+      ? prf
+      : `${prf.domain}/${prf.login}`
+
     return html`
       <li>
-        <a href=# onclick=${load.bind(null, idx)}>
-          ${prf.domain}/${prf.login}
+        <a href=# onclick=${selectprofile.bind(null, idx)}>
+          ${name}
         </a>
         <a href=#
            class="remove"
+           style="display: ${typeof idx === 'undefined' ? 'none' : ''}"
            title="delete this profile"
            onclick=${remove.bind(null, idx)}>
           ×
@@ -56,6 +51,7 @@ function main (state, emit) {
   </div>
   <ul id="profiles" style="display: ${state.showingprofiles ? '' : 'none'}">
     ${state.profiles.map(profileItem)}
+    ${profileItem('default')}
   </ul>
   <form onsubmit=${generate} style="display: ${state.showingprofiles ? 'none' : ''}">
     <input value=${state.domain} oninput=${changedomain}>
@@ -121,9 +117,9 @@ function main (state, emit) {
     emit('showingprofiles', !state.showingprofiles)
   }
 
-  function load (idx, e) {
+  function selectprofile (idx, e) {
     e.preventDefault()
-    emit('load', idx)
+    emit('selectprofile', idx)
   }
 
   function remove (idx, e) {
@@ -172,8 +168,11 @@ function controller (state, emitter) {
     emitter.emit('render')
   })
 
-  emitter.on('load', idx => {
-    let profile = state.profiles[idx]
+  emitter.on('selectprofile', idx => {
+    let profile = typeof idx === 'undefined'
+      ? state.defaultProfile
+      : state.profiles[idx]
+
     chooseProfile(state, profile)
     state.showingprofiles = false
     emitter.emit('render')
@@ -202,10 +201,20 @@ function profileStarter (state, emitter) {
 }
 
 function generator (state, emitter) {
-  state.domain = location.host
-  state.login = ''
-  state.master = ''
-  state.options = Object.assign({}, window.defaultOptions)
+  state.defaultProfile = {
+    domain: location.host,
+    login: '',
+    options: {
+      uppercase: true,
+      lowercase: true,
+      numbers: true,
+      symbols: true,
+      length: 16,
+      counter: 1,
+      version: 2
+    }
+  }
+  chooseProfile(state, state.defaultProfile)
 
   emitter.on('setoption', (key, value) => {
     state.options[key] = value
@@ -400,7 +409,7 @@ function chooseProfile (state, profile) {
 
   var optionsDifferentThanDefault = false
   for (let k in profile.options) {
-    if (profile.options[k] !== window.defaultOptions[k]) {
+    if (profile.options[k] !== state.defaultProfile.options[k]) {
       optionsDifferentThanDefault = true
       break
     }
