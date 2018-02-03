@@ -121,6 +121,7 @@ module.exports = app
 let css = `
 * {
   box-sizing: border-box;
+  font-family: Ubuntu, Arial, sans-serif;
 }
 form {
   display: flex;
@@ -156,6 +157,7 @@ form {
         margin: 7px 3px 0 3px;
       }
   form button {
+    font-size: 1.5em;
     cursor: pointer;
     background-color: #024379;
     padding-top: 7px;
