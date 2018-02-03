@@ -69,3 +69,5 @@ window.addEventListener('message', e => {
     popup.close()
   }
 })
+
+chrome.storage.sync.set({seenOptions: true})

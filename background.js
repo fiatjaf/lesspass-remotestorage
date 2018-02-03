@@ -112,3 +112,19 @@ function fetchProfiles (host, tabId) {
     })
     .catch(e => console.log('failed to fetch data on host', host, e))
 }
+
+// show a page telling the user to input their token after installation
+chrome.storage.sync.get(['user', 'token'], ({token, user}) => {
+  if (chrome.runtime.lastError) return
+
+  if (!token || !user) {
+    chrome.storage.sync.get('seenOptions', ({seenOptions}) => {
+      if (chrome.runtime.lastError) return
+      if (!seenOptions) {
+        chrome.tabs.create({
+          url: '/options.html'
+        })
+      }
+    })
+  }
+})
