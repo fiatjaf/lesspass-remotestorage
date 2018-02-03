@@ -26,7 +26,6 @@
     "open_in_tab": true
   },
   "icons": {
-    "48": "icon-white.svg",
-    "128": "icon-white.svg"
+    "512": "icon-blue.png"
   }
 }
