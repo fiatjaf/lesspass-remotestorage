@@ -3,3 +3,6 @@ dist
 *.swp
 *.swo
 node_modules
+tmp
+tmpsrc
+*.zip
