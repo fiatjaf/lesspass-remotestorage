@@ -17,26 +17,30 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         return
       }
     })
-
-    rs.client.getObject(`hosts/${parse(tab.url).resource}`)
-      .then(hostData => {
-        console.log('hostData', hostData)
-        if (hostData) {
-          return Promise.all(
-            hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
-          )
-        }
-      })
-      .then(profiles => {
-        console.log('profiles', profiles)
-        chrome.tabs.sendMessage(tab.id, {
-          kind: 'lesspass-here',
-          profiles
-        })
-      })
-      .catch(e => console.log('failed to fetch data on host', parse(tab.url).resource, e))
+    chrome.tabs.sendMessage(tab.id, {kind: 'lesspass-here'})
+    fetchProfiles(parse(tab.url).resource, tab.id)
   }
 })
+
+function fetchProfiles (host, tabId) {
+  rs.client.getObject(`hosts/${host}`)
+    .then(hostData => {
+      console.log('hostData', hostData)
+      if (hostData) {
+        return Promise.all(
+          hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
+        )
+      }
+    })
+    .then(profiles => {
+      console.log('profiles', profiles)
+      chrome.tabs.sendMessage(tabId, {
+        kind: 'profiles',
+        profiles
+      })
+    })
+    .catch(e => console.log('failed to fetch data on host', host, e))
+}
 
 chrome.runtime.onMessage.addListener((message, {url, tab}) => {
   console.log('message!', message)
@@ -49,25 +53,30 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
       let {profile} = message
       profileName = `${profile.domain}/${profile.login}`
 
-      rs.client.getObject(`hosts/${host}`)
-        .then((hostData = {profiles: []}) => {
-          var found = false
-          hostData.profiles.forEach(prf => {
-            if (prf === profileName) {
-              found = true
+      Promise.all([
+        rs.client.getObject(`hosts/${host}`)
+          .then((hostData = {profiles: []}) => {
+            var found = false
+            hostData.profiles.forEach(prf => {
+              if (prf === profileName) {
+                found = true
+              }
+            })
+            if (!found) {
+              hostData.profiles.unshift(profileName)
+              return rs.client.storeObject('host', `hosts/${host}`, hostData)
             }
           })
-          if (!found) {
-            hostData.profiles.unshift(profileName)
-            return rs.client.storeObject('host', `hosts/${host}`, hostData)
-          }
-        })
-        .then(() => console.log('updated host', host))
-        .catch(e => console.log('failed to update host', host, e))
+          .then(() => console.log('updated host', host))
+          .catch(e => console.log('failed to update host', host, e)),
 
-      rs.client.storeObject('profile', `profiles/${profileName}`, profile)
-        .then(() => console.log('updated profile', profile))
-        .catch(e => console.log('failed to update profile', profile, e))
+        rs.client.storeObject('profile', `profiles/${profileName}`, profile)
+          .then(() => console.log('updated profile', profile))
+          .catch(e => console.log('failed to update profile', profile, e))
+      ])
+        .then(() => {
+          fetchProfiles(host, tab.id)
+        })
       break
 
     case 'to-delete':

@@ -1,27 +1,35 @@
 /* global chrome */
 
 const outsideClick = require('outside-click')
+const deepEqual = require('deep-equal')
 const component = require('./component')
 
 if (!window.loaded) {
   window.loaded = true
 
+  function showWidget () {
+    passwordField = document.activeElement
+    lessPass.style.display = 'block'
+    outsideHandler = outsideClick(lessPass, () => {
+      remove()
+    })
+  }
+
   chrome.runtime.onMessage.addListener(message => {
-    if (message.kind === 'lesspass-here') {
-      passwordField = document.activeElement
-
-      if (message.profiles && message.profiles.length &&
-          lastProfiles.map(p => p.domain + '/' + p.login)[0] !==
-          message.profiles.map(p => p.domain + '/' + p.login)[0]) {
-        lastProfiles = message.profiles
-        sendProfiles(message.profiles)
-      }
-
-      lessPass.style.display = 'block'
-
-      outsideHandler = outsideClick(lessPass, () => {
-        remove()
-      })
+    switch (message.kind) {
+      case 'lesspass-here':
+        showWidget()
+        break
+      case 'profiles':
+        if (
+          message.profiles &&
+          message.profiles.length &&
+          !deepEqual(lastProfiles, message.profiles)
+        ) {
+          lastProfiles = message.profiles
+          sendProfiles(message.profiles)
+        }
+        break
     }
   })
 
@@ -85,4 +93,7 @@ if (!window.loaded) {
       })
     })
   })
+
+  // show the widget the first time we load this script no matter what
+  showWidget()
 }

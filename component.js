@@ -2,6 +2,7 @@ const choo = require('choo')
 const html = require('choo/html')
 const lesspass = require('lesspass')
 const debounce = require('debounce')
+const deepEqual = require('deep-equal')
 
 var app = choo()
 
@@ -407,13 +408,10 @@ function chooseProfile (state, profile) {
   state.domain = profile.domain
   state.login = profile.login
 
-  var optionsDifferentThanDefault = false
-  for (let k in profile.options) {
-    if (profile.options[k] !== state.defaultProfile.options[k]) {
-      optionsDifferentThanDefault = true
-      break
-    }
-  }
+  let optionsDifferentThanDefault = !deepEqual(
+    profile.options,
+    state.defaultProfile.options
+  )
 
   state.options = Object.assign({}, profile.options)
   state.master = ''
