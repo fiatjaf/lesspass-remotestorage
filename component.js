@@ -13,6 +13,10 @@ app.use(generator)
 app.use(fingerprinter)
 
 function main (state, emit) {
+  function renderIcon (svg) {
+    return html`<img src="data:image/svg+xml;utf-8,${svg}">`
+  }
+
   function profileItem (prf, idx) {
     let name = typeof prf === 'string'
       ? prf
@@ -32,10 +36,6 @@ function main (state, emit) {
         </a>
       </li>
     `
-  }
-
-  function renderIcon (svg) {
-    return html`<img src="data:image/svg+xml;utf-8,${svg}">`
   }
 
   return html`
@@ -103,7 +103,7 @@ function main (state, emit) {
         </label>
       </div>
     </div>
-    <button>Generate</button>
+    ${state.showpassword ? html`<div id="show-password">${state.showpassword}</div>` : html`<button>Generate</button>`}
   </form>
 </div>
   `
@@ -202,6 +202,7 @@ function profileStarter (state, emitter) {
 }
 
 function generator (state, emitter) {
+  state.showpassword = null
   state.defaultProfile = {
     domain: location.host,
     login: '',
@@ -218,16 +219,19 @@ function generator (state, emitter) {
   chooseProfile(state, state.defaultProfile)
 
   emitter.on('setoption', (key, value) => {
+    state.showpassword = null
     state.options[key] = value
     emitter.emit('render')
   })
 
   emitter.on('change', (key, value) => {
+    state.showpassword = null
     state[key] = value
     emitter.emit('render')
   })
 
   emitter.on('generate', debounce(() => {
+    state.showpassword = null
     lesspass.generatePassword(state.domain, state.login, state.master, state.options)
       .then(password => {
         emitter.emit('out-password', password)
@@ -235,6 +239,16 @@ function generator (state, emitter) {
       })
       .catch(e => console.log('failed to generate password', e))
   }, 400))
+
+  emitter.on('show-password', password => {
+    state.showpassword = password
+    emitter.emit('render')
+  })
+
+  emitter.on('hide-password', password => {
+    state.showpassword = null
+    emitter.emit('render')
+  })
 }
 
 function fingerprinter (state, emitter) {
@@ -375,6 +389,16 @@ form {
     padding-bottom: 7px;
     color: white;
   }
+
+  #show-password {
+    padding: 10px;
+    text-align: center;
+    color: white;
+    background: rgba(255, 255, 255, 0.4);
+    font-size: 17px;
+    border: dotted 4px;
+  }
+
   #options {}
     #options input {
       padding: 2px;

@@ -11,35 +11,23 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'lesspass-here') {
-    chrome.tabs.executeScript(tab.id, {file: '/dist/content-script.js'}, () => {
-      if (chrome.runtime.lastError) {
-        console.log('problem injecting content-script', chrome.runtime.lastError)
-        return
-      }
-    })
-    chrome.tabs.sendMessage(tab.id, {kind: 'lesspass-here'})
-    fetchProfiles(parse(tab.url).resource, tab.id)
+    lessPassHere(tab)
   }
 })
 
-function fetchProfiles (host, tabId) {
-  rs.client.getObject(`hosts/${host}`)
-    .then(hostData => {
-      console.log('hostData', hostData)
-      if (hostData) {
-        return Promise.all(
-          hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
-        )
-      }
-    })
-    .then(profiles => {
-      console.log('profiles', profiles)
-      chrome.tabs.sendMessage(tabId, {
-        kind: 'profiles',
-        profiles
-      })
-    })
-    .catch(e => console.log('failed to fetch data on host', host, e))
+chrome.browserAction.onClicked.addListener(tab => {
+  lessPassHere(tab)
+})
+
+function lessPassHere (tab) {
+  chrome.tabs.executeScript(tab.id, {file: '/dist/content-script.js'}, () => {
+    if (chrome.runtime.lastError) {
+      console.log('problem injecting content-script', chrome.runtime.lastError)
+      return
+    }
+  })
+  chrome.tabs.sendMessage(tab.id, {kind: 'lesspass-here'})
+  fetchProfiles(parse(tab.url).resource, tab.id)
 }
 
 chrome.runtime.onMessage.addListener((message, {url, tab}) => {
@@ -104,3 +92,23 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
       break
   }
 })
+
+function fetchProfiles (host, tabId) {
+  rs.client.getObject(`hosts/${host}`)
+    .then(hostData => {
+      console.log('hostData', hostData)
+      if (hostData) {
+        return Promise.all(
+          hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
+        )
+      }
+    })
+    .then(profiles => {
+      console.log('profiles', profiles)
+      chrome.tabs.sendMessage(tabId, {
+        kind: 'profiles',
+        profiles
+      })
+    })
+    .catch(e => console.log('failed to fetch data on host', host, e))
+}

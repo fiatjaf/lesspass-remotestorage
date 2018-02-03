@@ -8,7 +8,14 @@ if (!window.loaded) {
   window.loaded = true
 
   function showWidget () {
-    passwordField = document.activeElement
+    if (document.activeElement.type === 'password') {
+      passwordField = document.activeElement
+    } else {
+      passwordField = undefined
+    }
+
+    hidePasswordIfShown()
+
     lessPass.style.display = 'block'
     outsideHandler = outsideClick(lessPass, () => {
       remove()
@@ -36,6 +43,7 @@ if (!window.loaded) {
   var outsideHandler = {off: () => {}}
   var passwordField
   var sendProfiles
+  var hidePasswordIfShown
   var lastProfiles = []
   var remove
 
@@ -66,6 +74,10 @@ if (!window.loaded) {
       emitter.emit('rs-profiles', profiles)
     }
 
+    hidePasswordIfShown = function () {
+      emitter.emit('hide-password')
+    }
+
     emitter.on('rs-delete', profileName => {
       // send profile to be deleted from remoteStorage
       chrome.runtime.sendMessage({
@@ -75,10 +87,15 @@ if (!window.loaded) {
     })
 
     emitter.on('out-password', password => {
-      remove()
-
       // write password to field
-      passwordField.value = password
+      if (passwordField) {
+        passwordField.value = password
+        remove()
+      } else {
+        // if there's no password field to write to, just show
+        // the password on the widget itself
+        emitter.emit('show-password', password)
+      }
     })
 
     emitter.on('rs-store', (domain, login, options) => {

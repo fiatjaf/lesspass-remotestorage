@@ -15,6 +15,15 @@
     "storage",
     "tabs"
   ],
+  "browser_action": {
+    "browser_style": true,
+    "theme_icons": [{
+      "light": "icon-white.svg",
+      "dark": "icon-blue.svg",
+      "size": 512
+    }],
+    "default_title": "LessPass remoteStorage"
+  },
   "externally_connectable": {
     "matches": ["*://*.alhur.es/*"]
   },
