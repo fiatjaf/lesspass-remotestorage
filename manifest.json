@@ -15,6 +15,9 @@
     "storage",
     "tabs"
   ],
+  "externally_connectable": {
+    "matches": ["*://*.alhur.es/*"]
+  },
   "background": {
     "scripts": [
       "dist/background.js"

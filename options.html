@@ -46,6 +46,9 @@ body {
       #main label input {
         flex-grow: 2;
       }
+      #main label button {
+        margin-left: 2px;
+      }
   #main input {
     margin-left: 5px;
     width: 100%;
@@ -58,7 +61,11 @@ body {
       <img src=icon-white.svg>
     </div>
     <label><span>User: </span><input name="user"></label>
-    <label><span>Token: </span><input name="token"></label>
+    <label>
+      <span>Token: </span>
+      <input name="token">
+      <button id="rs-fetch-token">Fetch</button>
+    </label>
   </div>
 </div>
 

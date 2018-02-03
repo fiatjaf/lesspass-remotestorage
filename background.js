@@ -38,7 +38,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 })
 
-chrome.runtime.onMessage.addListener((message, {url}) => {
+chrome.runtime.onMessage.addListener((message, {url, tab}) => {
   console.log('message!', message)
 
   var profileName
@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener((message, {url}) => {
             }
           })
           if (!found) {
-            hostData.profiles.unshift(profileNa,e)
+            hostData.profiles.unshift(profileName)
             return rs.client.storeObject('host', `hosts/${host}`, hostData)
           }
         })
