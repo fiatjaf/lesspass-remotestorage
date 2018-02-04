@@ -35,6 +35,8 @@ function saveToken (token) {
   })
 }
 
+var popupOpened = false
+
 button.addEventListener('click', e => {
   e.preventDefault()
   Discover(user.value)
@@ -45,6 +47,8 @@ button.addEventListener('click', e => {
         'client_id=https://lesspass.alhur.es',
         'response_type=token'
       ].join('&'))
+
+      popupOpened = true
     })
     .catch(e => console.log('failed to discover', user.value, e))
 })
@@ -56,10 +60,13 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     saveToken(message.rsToken)
 
     // tell the background page to close the lesspass.alhur.es tab
-    chrome.runtime.sendMessage({
-      kind: 'close-tab',
-      tabId: sender.tab.id
-    })
+    if (popupOpened /* prevent us from closing a tab the user have spontaneously
+                       opened on lesspass.alhur.es with the extension installed */) {
+      chrome.runtime.sendMessage({
+        kind: 'close-tab',
+        tabId: sender.tab.id
+      })
+    }
   }
 })
 
