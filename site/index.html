@@ -1,16 +1,30 @@
 <!doctype html>
 
-<title>LessPass</title>
+<title>LessPass remoteStorage, the browser extension</title>
 <meta charset=utf-8>
+<meta name="Description" content="Alternative LessPass extension that optionally saves your password profiles to remoteStorage.">
 <style>
+* {
+  box-sizing: border-box;
+  font-family: Ubuntu, Arial, sans-serif;
+}
+
+h1 { color: #024379; }
+h1, h6, p { text-align: center; }
+a { color: #3398EB; }
+
+html {
+  background-color: ghostwhite;
+}
+
 #main {
   transform: scale(1.5);
   width: 800px;
-  margin: 150px auto;
+  margin: 170px auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: center
 }
   #main > * {
     flex: auto;
@@ -18,16 +32,53 @@
   #widget-here {
     display: flex;
     align-items: center;
+    margin-top: 5px;
+    margin-bottom: 21px;
   }
     #widget-here > * {
       flex: auto;
     }
+  #store-links { display: flex; }
+    #store-links > * {
+      flex: auto;
+      display: flex;
+      align-items: center;
+    }
+      #store-links > * > * {
+        flex: auto;
+      }
+  #footer {}
+    #footer img {
+      height: 20px;
+      margin: 0 4px -3px 0;
+    }
+
+.rs-widget {
+  position: fixed;
+  top: 3px;
+  right: 3px;
+}
 </style>
 <body>
   <div id="main">
-    <p>Don't use this, use the browser extensions!</p>
+    <div>
+      <h1>LessPass remoteStorage</h1>
+      <h6>An alternative LessPass widget with remoteStorage support and auto-filling capabilities!</h6>
+      <p>Don't use this here, use the <a href="https://addons.mozilla.org/firefox/addon/lesspass-remotestorage/">browser</a> <a href="https://chrome.google.com/webstore/detail/lesspass-remotestorage/aogdpopejodechblppdkpiimchbmdcmc">extensions</a>!</p>
+    </div>
     <div id="widget-here"></div>
-    <p><a href="https://github.com/fiatjaf/lesspass-remotestorage">Source</a></p>
+    <div id="store-links">
+      <a href="https://chrome.google.com/webstore/detail/lesspass-remotestorage/aogdpopejodechblppdkpiimchbmdcmc" title="download from Chrome Web Store">
+        <img src="chrome-button.png">
+      </a>
+      <a href="https://addons.mozilla.org/firefox/addon/lesspass-remotestorage/" title="Download from Mozilla Addons (AMO)">
+        <img src="firefox-button.png">
+      </a>
+    </div>
+    <div id="footer">
+      <p><a href="https://remotestorage.io/"><img src="remotestorage.png">Get remoteStorage!</a></p>
+      <p><a href="https://github.com/fiatjaf/lesspass-remotestorage"><img src="github.png">Source</a></p>
+    </div>
   </div>
 </body>
 <script src="bundle.js"></script>

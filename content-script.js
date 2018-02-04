@@ -61,6 +61,18 @@ if (!window.loaded) {
       emitter.emit('hide-password')
     }
 
+    emitter.on('rs-store', (domain, login, options) => {
+      // send stuff to be saved on remoteStorage
+      chrome.runtime.sendMessage({
+        kind: 'to-save',
+        profile: {
+          domain,
+          login,
+          options
+        }
+      })
+    })
+
     emitter.on('rs-delete', profileName => {
       // send profile to be deleted from remoteStorage
       chrome.runtime.sendMessage({
@@ -79,18 +91,6 @@ if (!window.loaded) {
         // the password on the widget itself
         emitter.emit('show-password', password)
       }
-    })
-
-    emitter.on('rs-store', (domain, login, options) => {
-      // send stuff to be saved on remoteStorage
-      chrome.runtime.sendMessage({
-        kind: 'to-save',
-        profile: {
-          domain,
-          login,
-          options
-        }
-      })
     })
   })
 

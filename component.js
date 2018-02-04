@@ -103,7 +103,7 @@ function main (state, emit) {
         </label>
       </div>
     </div>
-    ${state.showpassword ? html`<div id="show-password">${state.showpassword}</div>` : html`<button>Generate</button>`}
+    ${state.showpassword ? html`<input id="show-password" value=${state.showpassword}>` : html`<button>Generate</button>`}
   </form>
 </div>
   `
@@ -394,11 +394,13 @@ form {
     padding-top: 7px;
     padding-bottom: 7px;
     color: white;
+    text-align: center;
   }
 
   #show-password {
-    padding: 10px;
+    display: block;
     text-align: center;
+    padding: 10px;
     color: white;
     background: rgba(255, 255, 255, 0.4);
     font-size: 17px;

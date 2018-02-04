@@ -2,7 +2,7 @@
 
 const parse = require('parse-url')
 const isFirefox = require('is-firefox')
-const rs = require('./remotestorage')
+const {fetchProfiles, saveProfile, deleteProfile} = require('./remotestorage')
 
 chrome.contextMenus.create({
   contexts: [typeof browser === 'undefined' ? 'editable' : 'password'],
@@ -70,8 +70,6 @@ function lessPassHere (tab) {
 chrome.runtime.onMessage.addListener((message, {url, tab}) => {
   console.log('background message!', message)
 
-  var profileName
-
   // when the message comes from the popup we won't
   // have the `url` or the `tab` here, 
   Promise.resolve()
@@ -93,55 +91,14 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
       switch (message.kind) {
         case 'to-save':
           let {profile} = message
-          profileName = `${profile.domain}/${profile.login}`
-
-          Promise.all([
-            rs.client.getObject(`hosts/${host}`)
-              .then((hostData = {profiles: []}) => {
-                var found = false
-                hostData.profiles.forEach(prf => {
-                  if (prf === profileName) {
-                    found = true
-                  }
-                })
-                if (!found) {
-                  hostData.profiles.unshift(profileName)
-                  return rs.client.storeObject('host', `hosts/${host}`, hostData)
-                }
-              })
-              .then(() => console.log('updated host', host))
-              .catch(e => console.log('failed to update host', host, e)),
-
-            rs.client.storeObject('profile', `profiles/${profileName}`, profile)
-              .then(() => console.log('updated profile', profile))
-              .catch(e => console.log('failed to update profile', profile, e))
-          ])
-            .then(() => {
-              fetchProfiles(host).then(profiles => sendProfiles(profiles, tab.id))
-            })
+          saveProfile(host, profile)
+            .then(() => fetchProfiles(host))
+            .then(profiles => sendProfiles(profiles, tab.id))
           break
 
         case 'to-delete':
-          profileName = message.profileName
-
-          rs.client.getObject(`hosts/${host}`)
-            .then((hostData = {profiles: []}) => {
-              var idx
-              for (let i = 0; i < hostData.profiles.length; i++) {
-                if (hostData.profiles[i] === profileName) {
-                  idx = i
-                  break
-                }
-              }
-
-              if (idx !== undefined) {
-                hostData.profiles.splice(idx, 1)
-                return rs.client.storeObject('host', `hosts/${host}`, hostData)
-              }
-            })
-            .then(() =>
-              rs.client.remove(`profiles/${profileName}`)
-            )
+          let profileName = message.profileName
+          deleteProfile(host, profileName)
             .catch(e => console.log('failed to delete profile', profileName, e))
           break
 
@@ -171,19 +128,6 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
       }
     })
 })
-
-function fetchProfiles (host) {
-  console.log('fetching profiles for', host)
-  return rs.client.getObject(`hosts/${host}`)
-    .then(hostData => {
-      if (hostData) {
-        return Promise.all(
-          hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
-        )
-      }
-    })
-    .catch(e => console.log('failed to fetch data on host', host, e))
-}
 
 function sendProfiles (profiles, tabId) {
   if (isFirefox) {
