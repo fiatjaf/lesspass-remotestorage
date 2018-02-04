@@ -6,3 +6,4 @@ node_modules
 tmp
 tmpsrc
 *.zip
+site/bundle.js

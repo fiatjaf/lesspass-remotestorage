@@ -27,6 +27,8 @@
     "build-back": "browserify background.js -o dist/background.js",
     "build": "npm run build-cs && npm run build-opt && npm run build-back",
     "pack": "rm -fr tmp/ && npm run build && mkdir -p tmp && cp -r token-watcher.js icon* *.html manifest.json dist vendor tmp/ && cd tmp/ && zip -r archive * && mv archive.zip ../ && cd ..",
-    "pack-sources": "rm -fr tmpsrc/ && mkdir -p tmpsrc && cp -r icon* *.html *.js manifest.json *.json vendor *.md tmpsrc/ && cd tmp/ && zip -r sources * && mv sources.zip ../ && cd .."
+    "pack-sources": "rm -fr tmpsrc/ && mkdir -p tmpsrc && cp -r icon* *.html *.js manifest.json *.json vendor *.md tmpsrc/ && cd tmp/ && zip -r sources * && mv sources.zip ../ && cd ..",
+    "watch-site": "ls *.js | entr browserifyinc -vd site/app.js -o site/bundle.js",
+    "build-site": "browserify site/app.js -o site/bundle.js"
   }
 }

@@ -22,24 +22,6 @@ if (!window.loaded) {
     })
   }
 
-  chrome.runtime.onMessage.addListener(message => {
-    switch (message.kind) {
-      case 'lesspass-here':
-        showWidget()
-        break
-      case 'profiles':
-        if (
-          message.profiles &&
-          message.profiles.length &&
-          !deepEqual(lastProfiles, message.profiles)
-        ) {
-          lastProfiles = message.profiles
-          sendProfiles(message.profiles)
-        }
-        break
-    }
-  })
-
   var outsideHandler = {off: () => {}}
   var passwordField
   var sendProfiles
@@ -62,7 +44,7 @@ if (!window.loaded) {
 
   component.use((_, emitter) => {
     remove = function () {
-      emitter.emit('loading', false)
+      emitter.emit('showingprofiles', false)
       lessPass.style.display = 'none'
       outsideHandler.off()
     }
@@ -114,4 +96,23 @@ if (!window.loaded) {
 
   // show the widget the first time we load this script no matter what
   showWidget()
+
+  // messages from background.js
+  chrome.runtime.onMessage.addListener(message => {
+    switch (message.kind) {
+      case 'lesspass-here':
+        showWidget()
+        break
+      case 'profiles':
+        if (
+          message.profiles &&
+          message.profiles.length &&
+          !deepEqual(lastProfiles, message.profiles)
+        ) {
+          lastProfiles = message.profiles
+          sendProfiles(message.profiles)
+        }
+        break
+    }
+  })
 }
