@@ -103,6 +103,7 @@ function fetchProfiles (host) {
           hostData.profiles.map(prf => rs.client.getObject(`profiles/${prf}`))
         )
       }
+      return []
     })
     .catch(e => console.log('failed to fetch data on host', host, e))
 }

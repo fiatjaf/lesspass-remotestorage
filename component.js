@@ -437,6 +437,8 @@ form {
 `
 
 function chooseProfile (state, profile) {
+  if (!profile) return
+
   state.domain = profile.domain
   state.login = profile.login
 

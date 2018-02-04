@@ -1,5 +1,5 @@
 const Widget = require('remotestorage-widget')
-const debounce = require('debounce')
+const debounce = require('debounce-with-result')
 
 const component = require('../component')
 const rs = require('../remotestorage')
@@ -11,13 +11,13 @@ widget.attach()
 document.head.appendChild(component.style)
 document.getElementById('widget-here').appendChild(component.start())
 
+const dfetchProfiles = debounce(fetchProfiles, 1000)
+
 rs.on('connected', () => {
   component.use(function (state, emitter) {
-    const dFetchProfiles = debounce(fetchProfiles, 1000)
-
     emitter.on('change', (key, value) => {
       if (key === 'domain') {
-        dFetchProfiles(value)
+        dfetchProfiles(value)
           .then(profiles => {
             emitter.emit('rs-profiles', profiles)
           })
