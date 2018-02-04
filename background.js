@@ -12,13 +12,11 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === 'lesspass-here') {
-    console.log('contextmenu click', tab.url)
     lessPassHere(tab)
   }
 })
 
 chrome.browserAction.onClicked.addListener(tab => {
-  console.log('browseraction click', tab.url)
   lessPassHere(tab)
 })
 
@@ -66,14 +64,11 @@ function lessPassHere (tab) {
     fetchProfiles(host),
     waitClient
   ])
-    .then(([profiles]) => {
-      console.log('loaded profiles', profiles)
-      return sendProfiles(profiles)
-    })
+    .then(([profiles]) => sendProfiles(profiles, tab.id))
 }
 
 chrome.runtime.onMessage.addListener((message, {url, tab}) => {
-  console.log('message!', message)
+  console.log('background message!', message)
 
   var profileName
 
@@ -122,9 +117,7 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
               .catch(e => console.log('failed to update profile', profile, e))
           ])
             .then(() => {
-              fetchProfiles(host).then(profiles =>
-                sendProfiles(profiles, tab.id)
-              )
+              fetchProfiles(host).then(profiles => sendProfiles(profiles, tab.id))
             })
           break
 
@@ -169,6 +162,11 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
             // clicks, so let's call it here.
             lessPassHere(tab)
           }
+          break
+
+        case 'fill-password':
+          // proxy this from popup.js to thin-content-script.js
+          browser.tabs.sendMessage(tab.id, message)
           break
       }
     })
