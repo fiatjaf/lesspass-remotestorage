@@ -1,19 +1,4 @@
 <!doctype html>
 
-<script>
-if (location.hash.slice(1, 1 + 'access_token'.length) === 'access_token') {
-  let token = location.hash.split('=')[1]
-  if (typeof chrome !== 'undefined') {
-    chrome.runtime.sendMessage('aogdpopejodechblppdkpiimchbmdcmc', {
-      rsToken: token
-    })
-  } else {
-    window.parent.postMessage({
-      rsToken: token
-    }, '*')
-  }
-} 
-</script>
-<body>
-</body>
+<body></body>
 <script src="bundle.js"></script>

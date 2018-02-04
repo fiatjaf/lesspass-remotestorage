@@ -90,6 +90,14 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
         )
         .catch(e => console.log('failed to delete profile', profileName, e))
       break
+
+    case 'close-tab':
+      console.log('closing tab', message.tabId)
+      chrome.tabs.remove(message.tabId, () => {
+        if (chrome.runtime.lastError) {
+          console.log('failed to close tab', message.tabId, chrome.runtime.lastError)
+        }
+      })
   }
 })
 

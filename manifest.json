@@ -14,8 +14,13 @@
     "activeTab",
     "contextMenus",
     "storage",
-    "tabs"
+    "tabs",
+    "*://lesspass.alhur.es/*"
   ],
+  "content_scripts": [{
+    "matches": ["*://lesspass.alhur.es/*"],
+    "js": ["token-watcher.js"]
+  }],
   "browser_action": {
     "browser_style": true,
     "theme_icons": [{
@@ -24,9 +29,6 @@
       "size": 512
     }],
     "default_title": "LessPass remoteStorage"
-  },
-  "externally_connectable": {
-    "matches": ["*://*.alhur.es/*"]
   },
   "background": {
     "scripts": [
