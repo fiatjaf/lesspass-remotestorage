@@ -1,4 +1,33 @@
 <!doctype html>
 
-<body></body>
+<title>LessPass</title>
+<meta charset=utf-8>
+<style>
+#main {
+  transform: scale(1.5);
+  width: 800px;
+  margin: 150px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+  #main > * {
+    flex: auto;
+  }
+  #widget-here {
+    display: flex;
+    align-items: center;
+  }
+    #widget-here > * {
+      flex: auto;
+    }
+</style>
+<body>
+  <div id="main">
+    <p>Don't use this, use the browser extensions!</p>
+    <div id="widget-here"></div>
+    <p><a href="https://github.com/fiatjaf/lesspass-remotestorage">Source</a></p>
+  </div>
+</body>
 <script src="bundle.js"></script>
