@@ -6,43 +6,57 @@
 * {
   box-sizing: border-box;
   font-family: Ubuntu, Arial, sans-serif;
-  font-size: 120%;
+  font-size: 26px;
+}
+html {
+  height: 100vh;
+  background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(111,182,241,1) 100%);
 }
 body {
   margin: auto;
-  width: 800px;
+  width: 1000px;
+  height: 100vh;
   max-width: 97%;
-  background-color: #3398EB;
+  display: flex;
+  align-items: center;
 }
 
 #main {
+  flex: auto;
   display: flex;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  flex-direction: column;
 }
   #main > * {
     flex: auto;
     margin: 8px;
     display: flex;
-    flex-direction: column;
   }
+    #main > * > * {
+      flex: auto;
+    }
+    #credentials > * {
+      display: flex;
+      flex-direction: column;
+      align-content: center;
+    }
     #main img {
-      display: block;
-      width: 220px;
-      margin: -100px auto 0;
+      height: 180px;
+      margin-right: 26px;
     }
     #main label {
       flex: auto;
       margin: 2px;
       display: flex;
       justify-content: space-between;
-      color: white;
+      color: #FF4B03;
+      text-shadow: 1px 1px 1px white;
     }
       #main label span {
         flex-shrink: 2;
-        min-width: 170px;
-        line-height: 65px;
+        min-width: 110px;
+        line-height: 45px;
       }
       #main label input {
         flex-grow: 2;
@@ -55,19 +69,41 @@ body {
     margin-left: 5px;
     padding: 7px;
   }
+  #info {}
+    #info p {
+      margin: 12px;
+    }
+    #info a {
+      color: black;
+      text-decoration: none;
+    }
 </style>
 
 <div id="main">
-  <div>
+  <h1>LessPass remoteStorage</h1>
+  <div id="credentials">
+    <img src=icon-remotestorage.svg>
     <div>
-      <img src=icon-white.svg>
+      <p>Your remoteStorage credentials:</p>
+      <label>
+        <span>User: </span>
+        <input name="user" placeholder="Your remoteStorage username">
+      </label>
+      <label>
+        <span>Token: </span>
+        <input name="token" placeholder="Click → to fetch one for your given username">
+        <button id="rs-fetch-token">Fetch</button>
+      </label>
     </div>
-    <label><span>User: </span><input name="user"></label>
-    <label>
-      <span>Token: </span>
-      <input name="token">
-      <button id="rs-fetch-token">Fetch</button>
-    </label>
+  </div>
+  <div id="info">
+    <img src="icon-white.svg">
+    <div>
+      <p><a href="https://lesspass.com/">More about LessPass</a></p>
+      <p><a href="https://remotestorage.io/">Get some remoteStorage</a></p>
+      <p><a href="https://lesspass.alhur.es/">Homepage for this extension</a></p>
+      <p><a href="https://github.com/fiatjaf/lesspass-remotestorage">Source for this extension</a></p>
+    </div>
   </div>
 </div>
 
