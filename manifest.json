@@ -11,10 +11,10 @@
     }
   },
   "permissions": [
+    "tabs",
     "activeTab",
     "contextMenus",
     "storage",
-    "tabs",
     "*://lesspass.alhur.es/*"
   ],
   "content_scripts": [{

@@ -14,7 +14,7 @@ app.use(fingerprinter)
 
 function main (state, emit) {
   function renderIcon (svg) {
-    return html`<img src="data:image/svg+xml;utf-8,${svg}">`
+    return html`<img src="data:image/svg+xml;base64,${window.btoa(svg)}">`
   }
 
   function profileItem (prf, idx) {
@@ -217,6 +217,12 @@ function generator (state, emitter) {
     }
   }
   chooseProfile(state, state.defaultProfile)
+
+  emitter.on('active-host', host => {
+    state.defaultProfile.domain = host
+    state.domain = host
+    emitter.emit('render')
+  })
 
   emitter.on('setoption', (key, value) => {
     state.showpassword = null

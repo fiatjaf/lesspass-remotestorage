@@ -3,6 +3,7 @@
     "choo": "^6.7.0",
     "debounce": "^1.1.0",
     "deep-equal": "^1.0.1",
+    "is-firefox": "^1.0.3",
     "lesspass": "^6.0.0",
     "outside-click": "^2.0.0",
     "parse-url": "^3.0.2",
@@ -21,12 +22,14 @@
   "scripts": {
     "watch-cs": "ls *.js | entr browserifyinc -vd content-script.js -o dist/content-script.js",
     "build-cs": "browserify content-script.js -o dist/content-script.js",
+    "watch-popup": "ls *.js | entr browserifyinc -vd popup.js -o dist/popup.js",
+    "build-popup": "browserify popup.js -o dist/popup.js",
     "watch-opt": "ls *.js | entr browserifyinc -vd options.js -o dist/options.js",
     "build-opt": "browserify options.js -o dist/options.js",
     "watch-back": "ls *.js | entr browserifyinc -vd background.js -o dist/background.js",
     "build-back": "browserify background.js -o dist/background.js",
     "build": "npm run build-cs && npm run build-opt && npm run build-back",
-    "pack": "rm -fr tmp/ && npm run build && mkdir -p tmp && cp -r token-watcher.js icon* *.html manifest.json dist vendor tmp/ && cd tmp/ && zip -r archive * && mv archive.zip ../ && cd ..",
+    "pack": "rm -fr tmp/ && npm run build && mkdir -p tmp && cp -r thin-content-script.js token-watcher.js icon* *.html manifest.json dist vendor tmp/ && cd tmp/ && zip -r archive * && mv archive.zip ../ && cd ..",
     "pack-sources": "rm -fr tmpsrc/ && mkdir -p tmpsrc && cp -r icon* *.html *.js manifest.json *.json vendor *.md tmpsrc/ && cd tmp/ && zip -r sources * && mv sources.zip ../ && cd ..",
     "watch-site": "ls *.js | entr browserifyinc -vd site/app.js -o site/bundle.js",
     "build-site": "browserify site/app.js -o site/bundle.js"

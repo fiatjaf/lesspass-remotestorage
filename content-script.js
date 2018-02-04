@@ -7,23 +7,8 @@ const component = require('./component')
 if (!window.loaded) {
   window.loaded = true
 
-  function showWidget () {
-    if (document.activeElement.type === 'password') {
-      passwordField = document.activeElement
-    } else {
-      passwordField = undefined
-    }
-
-    hidePasswordIfShown()
-
-    lessPass.style.display = 'block'
-    outsideHandler = outsideClick(lessPass, () => {
-      remove()
-    })
-  }
-
-  var outsideHandler = {off: () => {}}
   var passwordField
+  var outsideHandler = {off: () => {}}
   var sendProfiles
   var hidePasswordIfShown
   var lastProfiles = []
@@ -41,6 +26,21 @@ if (!window.loaded) {
   let shadow = lessPass.attachShadow({mode: 'closed'})
   shadow.appendChild(component.style)
   shadow.appendChild(component.start())
+
+  function showWidget () {
+    if (document.activeElement.type === 'password') {
+      passwordField = document.activeElement
+    } else {
+      passwordField = undefined
+    }
+
+    hidePasswordIfShown()
+
+    lessPass.style.display = 'block'
+    outsideHandler = outsideClick(lessPass, () => {
+      remove()
+    })
+  }
 
   component.use((_, emitter) => {
     remove = function () {
@@ -99,6 +99,7 @@ if (!window.loaded) {
 
   // messages from background.js
   chrome.runtime.onMessage.addListener(message => {
+    console.log('got message on popup', message)
     switch (message.kind) {
       case 'lesspass-here':
         showWidget()
@@ -114,5 +115,9 @@ if (!window.loaded) {
         }
         break
     }
+  })
+
+  chrome.runtime.sendMessage({
+    kind: 'client-ready'
   })
 }
