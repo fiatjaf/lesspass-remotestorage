@@ -1,9 +1,9 @@
 {
   "name": "LessPass remoteStorage",
-  "description": "Alternative LessPass extension that optionally saves your password profiles to remoteStorage.",
+  "description": "An alternative LessPass widget with remoteStorage support and auto-filling capabilities!",
   "homepage_url": "https://github.com/fiatjaf/lesspass-remotestorage",
   "manifest_version": 2,
-  "version" : "0.0.2",
+  "version" : "0.1.0",
   "applications": {
     "gecko": {
       "id": "lesspass@alhur.es",
@@ -19,7 +19,8 @@
   ],
   "content_scripts": [{
     "matches": ["*://lesspass.alhur.es/*"],
-    "js": ["token-watcher.js"]
+    "js": ["token-watcher.js"],
+    "run_at": "document_start"
   }],
   "browser_action": {
     "browser_style": true,
