@@ -30,7 +30,7 @@
     "build-opt": "browserify options.js -o dist/options.js",
     "watch-back": "ls *.js | entr browserifyinc -vd background.js -o dist/background.js",
     "build-back": "browserify background.js -o dist/background.js",
-    "build": "npm run build-cs && npm run build-opt && npm run build-back",
+    "build": "npm run build-cs && npm run build-opt && npm run build-back && npm run build-popup",
     "pack": "rm -fr tmp/ && npm run build && mkdir -p tmp && cp -r thin-content-script.js token-watcher.js icon* *.html manifest.json dist vendor tmp/ && cd tmp/ && zip -r archive * && mv archive.zip ../ && cd ..",
     "pack-sources": "rm -fr tmpsrc/ && mkdir -p tmpsrc && cp -r icon* *.html *.js *.json vendor *.md tmpsrc/ && cd tmpsrc/ && zip -r sources * && mv sources.zip ../ && cd ..",
     "watch-site": "ls *.js site/* | entr browserifyinc -vd site/app.js -o site/bundle.js",
