@@ -38,6 +38,11 @@ function main (state, emit) {
     `
   }
 
+  setTimeout(() => {
+    let master = document.querySelector('.master input')
+    if (master) master.focus()
+  }, 10)
+
   return html`
 <div id=lesspass>
   <div id="controls">
@@ -58,7 +63,10 @@ function main (state, emit) {
     <input value=${state.domain} oninput=${changedomain}>
     <input value=${state.login} oninput=${changelogin}>
     <div class=master>
-      <input type=password value=${state.master} oninput=${changemaster}>
+      <input type=password
+             style="width: ${state.fingerprint ? '265px' : 'auto'}"
+             value=${state.master}
+             oninput=${changemaster}>
       <div class=fingerprint style="display: ${state.fingerprint ? '' : 'none'}">
         ${(state.fingerprint || []).map(renderIcon)}
       </div>
@@ -304,8 +312,11 @@ let css = `
   margin: 3px;
   padding: 16px 14px;
   border-radius: 6px;
-  font-size: 1.1em;
   box-shadow: 1px 1px 8px #555;
+}
+
+input, p, a {
+  font-size: 1.3em;
 }
 
 a { text-decoration: none; }
@@ -386,7 +397,7 @@ form {
       padding: 0 2px;
     }
       .fingerprint img {
-        height: 15px;
+        height: 25px;
         margin: 7px 3px 0 3px;
       }
   form button {
