@@ -194,6 +194,8 @@ function profileStarter (state, emitter) {
   state.profiles = []
 
   emitter.on('rs-profiles', profiles => {
+    if (!profiles || !Array.isArray(profiles)) return
+
     state.profiles = profiles
 
     chooseProfile(state, profiles[0])

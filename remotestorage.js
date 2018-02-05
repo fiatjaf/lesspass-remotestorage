@@ -105,6 +105,7 @@ function fetchProfiles (host) {
       }
       return []
     })
+    .then(profiles => profiles.filter(prf => prf))
     .catch(e => console.log('failed to fetch data on host', host, e))
 }
 
