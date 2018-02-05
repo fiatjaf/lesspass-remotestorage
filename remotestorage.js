@@ -106,7 +106,6 @@ function fetchProfiles (host) {
       return []
     })
     .then(profiles => profiles.filter(prf => prf))
-    .catch(e => console.log('failed to fetch data on host', host, e))
 }
 
 module.exports.saveProfile = saveProfile
@@ -127,12 +126,10 @@ function saveProfile (host, profile) {
           return rs.client.storeObject('host', `hosts/${host}`, hostData)
         }
       })
-      .then(() => console.log('updated host', host))
-      .catch(e => console.log('failed to update host', host, e)),
+      .then(() => console.log('updated host', host)),
 
     rs.client.storeObject('profile', `profiles/${profileName}`, profile)
       .then(() => console.log('updated profile', profile))
-      .catch(e => console.log('failed to update profile', profile, e))
   ])
 }
 

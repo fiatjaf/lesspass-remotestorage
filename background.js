@@ -65,6 +65,7 @@ function lessPassHere (tab) {
     waitClient
   ])
     .then(([profiles]) => sendProfiles(profiles, tab.id))
+    .catch(e => console.log('failed to fetch profiles', host, e))
 }
 
 chrome.runtime.onMessage.addListener((message, {url, tab}) => {
@@ -94,6 +95,7 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
           saveProfile(host, profile)
             .then(() => fetchProfiles(host))
             .then(profiles => sendProfiles(profiles, tab.id))
+            .catch(e => console.log('failed to save profile', host, profile, e))
           break
 
         case 'to-delete':

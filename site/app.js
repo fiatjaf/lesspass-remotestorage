@@ -21,15 +21,22 @@ rs.on('connected', () => {
           .then(profiles => {
             emitter.emit('rs-profiles', profiles)
           })
+          .catch(e => console.log('failed to fetch profiles', value, e))
       }
     })
 
     emitter.on('rs-store', (domain, login, options) => {
-      saveProfile({domain, login, options})
+      saveProfile(domain, {domain, login, options})
+        .then(() => {
+          emitter.emit('change', 'domain', domain)
+          // so that we'll fetch the profiles again.
+        })
+        .catch(e => console.log('failed to save profile', domain, login, e))
     })
 
     emitter.on('rs-delete', profileName => {
       deleteProfile(state.domain, profileName)
+        .catch(e => console.log('failed to delete profile', state.domain, profileName, e))
     })
   })
 })
