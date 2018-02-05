@@ -7,6 +7,7 @@ const deepEqual = require('deep-equal')
 var app = choo()
 
 app.route(location.pathname, main)
+app.use(firstrender)
 app.use(controller)
 app.use(profileStarter)
 app.use(generator)
@@ -38,10 +39,7 @@ function main (state, emit) {
     `
   }
 
-  setTimeout(() => {
-    let master = document.querySelector('.master input')
-    if (master) master.focus()
-  }, 10)
+  emit('firstrender')
 
   return html`
 <div id=lesspass>
@@ -161,6 +159,22 @@ function main (state, emit) {
     e.preventDefault()
     emit('generate')
   }
+}
+
+function firstrender (state, emitter) {
+  state.firstrender = true
+
+  emitter.on('firstrender', () => {
+    if (!state.firstrender) return
+    state.firstrender = false
+
+    setTimeout(() => {
+      let master = document.querySelector('.master input')
+      if (master) {
+        master.focus()
+      }
+    }, 10)
+  })
 }
 
 function controller (state, emitter) {
