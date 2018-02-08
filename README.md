@@ -1,3 +1,12 @@
+
+Links
+-----
+
+  * The [Firefox extension](https://addons.mozilla.org/firefox/addon/lesspass-remotestorage/)
+  * The [Chrome extension](https://chrome.google.com/webstore/detail/lesspass-remotestorage/aogdpopejodechblppdkpiimchbmdcmc)
+  * The [site](https://lesspass.alhur.es/) (you can see it working without installing a thing)
+
+
 How to build
 ------------
 
