@@ -6,7 +6,7 @@ const deepEqual = require('deep-equal')
 
 var app = choo()
 
-app.route(location.pathname, main)
+app.route('404', main)
 app.use(firstrender)
 app.use(controller)
 app.use(profileStarter)
