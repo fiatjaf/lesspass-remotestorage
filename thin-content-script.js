@@ -1,4 +1,4 @@
-/* global browser */
+/* global browser, Event */
 
 var passwordField
 
@@ -16,6 +16,11 @@ browser.runtime.onMessage.addListener(message => {
       trackField()
       break
     case 'fill-password':
+      let nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype, 'value'
+      ).set
+      nativeInputValueSetter.call(passwordField, message.password)
+      passwordField.dispatchEvent('input', new Event('input', {bubbles: true}))
       passwordField.value = message.password
       break
   }

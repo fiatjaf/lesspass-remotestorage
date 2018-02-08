@@ -1,4 +1,4 @@
-/* global chrome */
+/* global chrome, Event */
 
 const outsideClick = require('outside-click')
 const deepEqual = require('deep-equal')
@@ -84,6 +84,11 @@ if (!window.loaded) {
     emitter.on('out-password', password => {
       // write password to field
       if (passwordField) {
+        let nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype, 'value'
+        ).set
+        nativeInputValueSetter.call(passwordField, password)
+        passwordField.dispatchEvent('input', new Event('input', {bubbles: true}))
         passwordField.value = password
         remove()
       } else {
