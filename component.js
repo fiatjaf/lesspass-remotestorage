@@ -18,12 +18,28 @@ function main (state, emit) {
     return html`<img src="data:image/svg+xml;base64,${window.btoa(svg)}">`
   }
 
-  function profileItem (prf, idx) {
+  function profileItem (prf, idx, removing) {
     let name = typeof prf === 'string'
       ? prf
       : `${prf.domain}/${prf.login}`
 
-    return html`
+    return removing
+      ? html`
+      <li>
+        <a>Really remove ${name}?</a>
+        <a href=#
+           class="remove"
+           onclick=${reallyremove.bind(null, idx)}>
+          yes, remove
+        </a>
+        <a href=#
+           class="cancelremove"
+           onclick=${cancelremove}>
+          cancel
+        </a>
+      </li.
+      `
+      : html`
       <li>
         <a href=# onclick=${selectprofile.bind(null, idx)}>
           ${name}
@@ -54,7 +70,7 @@ function main (state, emit) {
     >${state.showingprofiles ? 'cancel' : 'load profiles'}</a>
   </div>
   <ul id="profiles" style="display: ${state.showingprofiles ? '' : 'none'}">
-    ${state.profiles.map(profileItem)}
+    ${state.profiles.map((prf, idx) => profileItem(prf, idx, state.confirmingdelete === idx))}
     ${profileItem('default')}
   </ul>
   <form onsubmit=${generate} style="display: ${state.showingprofiles ? 'none' : ''}">
@@ -134,6 +150,16 @@ function main (state, emit) {
     emit('remove', idx)
   }
 
+  function reallyremove (idx, e) {
+    e.preventDefault()
+    emit('reallyremove', idx)
+  }
+
+  function cancelremove (e) {
+    e.preventDefault()
+    emit('cancelremove')
+  }
+
   function changeoption (attr, e) {
     emit('setoption', attr, parseInt(e.target.value))
   }
@@ -180,6 +206,7 @@ function firstrender (state, emitter) {
 function controller (state, emitter) {
   state.showingoptions = false
   state.showingprofiles = false
+  state.confirmingdelete = false
 
   emitter.on('showingoptions', showingoptions => {
     state.showingoptions = showingoptions
@@ -202,13 +229,22 @@ function controller (state, emitter) {
   })
 
   emitter.on('remove', idx => {
+    state.confirmingdelete = idx
+    emitter.emit('render')
+  })
+
+  emitter.on('reallyremove', idx => {
     let name = state.profiles[idx].domain + '/' + state.profiles[idx].login
-    if (window.confirm(`Delete the ${name} profile from remoteStorage?`)) {
-      emitter.emit('rs-delete', name)
-      state.profiles.splice(idx, 1)
-      state.showingprofiles = false
-      emitter.emit('render')
-    }
+    emitter.emit('rs-delete', name)
+    state.profiles.splice(idx, 1)
+    state.confirmingdelete = false
+    state.showingprofiles = false
+    emitter.emit('render')
+  })
+
+  emitter.on('cancelremove', () => {
+    state.confirmingdelete = false
+    emitter.emit('render')
   })
 }
 
@@ -375,7 +411,8 @@ ul, li {
     color: rgba(255, 255, 255, 0.7);
   }
   #profiles a:hover { color: rgba(255, 255, 255, 1) }
-  #profiles .remove {
+  #profiles .remove,
+  #profiles .cancelremove {
     border-radius: 100px;
     line-height: 10px;
     padding: 7px 9px;
@@ -388,6 +425,13 @@ ul, li {
       background-color: rgba(255, 255, 255, 0.9);
     }
       #profiles .remove:hover a { color: #777; }
+  #profiles .cancelremove { padding: 9px 11px; }
+    #profiles .cancelremove:hover { background-color: rgba(255, 255, 255, 0.6); }
+      #profiles .cancelremove:hover a { color: #777; }
+    #profiles .cancelremove a {
+      background: yellow;
+      color: #444;
+    }
 form {
   display: flex;
   flex-direction: column;

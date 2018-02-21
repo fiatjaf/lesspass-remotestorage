@@ -72,7 +72,7 @@ chrome.runtime.onMessage.addListener((message, {url, tab}) => {
   console.log('background message!', message)
 
   // when the message comes from the popup we won't
-  // have the `url` or the `tab` here, 
+  // have the `url` or the `tab` here.
   Promise.resolve()
     .then(() => {
       if (tab) {
